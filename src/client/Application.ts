@@ -11,7 +11,7 @@ const WORLD_SIZE = 2000;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
-const FlorpTexture = PIXI.Texture.from('assets/florp.png');
+const FlorpTexture = PIXI.Texture.from('florp.png');
 
 export class Application extends PIXI.Application {
     entities: { [id: string]: PIXI.Graphics } = {};
