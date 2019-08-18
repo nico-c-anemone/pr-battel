@@ -9,12 +9,15 @@ export class Entity extends Schema {
     angle: number = 0;
     speed = 0;
 
-    constructor(x: number, y: number, radius: number) {
+    type: number;
+
+    constructor(x: number, y: number, radius: number, type: number) {
         super();
 
         this.x = x;
         this.y = y;
         this.radius = radius;
+        this.type = type;
     }
 
     static distance(a: Entity, b: Entity) {

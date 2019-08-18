@@ -3,7 +3,12 @@ import { Entity } from "./Entity";
 import { Schema, type, MapSchema } from "@colyseus/schema";
 
 const WORLD_SIZE = 2000;
+
 const DEFAULT_PLAYER_RADIUS = 10;
+const DEFAULT_PROJECTILE_RADIUS = 5;
+
+const DEFAULT_PLAYER_TYPE = 0;
+const DEFAULT_PROJECTILE_TYPE = 1;
 
 export class State extends Schema {
 
@@ -14,23 +19,24 @@ export class State extends Schema {
   entities = new MapSchema<Entity>();
 
   initialize () {
-    // create some food entities
-    for (let i = 0; i < 100; i++) {
-      this.createFood();
-    }
-  }
-
-  createFood () {
-    const radius = Math.max(4, (Math.random() * (DEFAULT_PLAYER_RADIUS - 1)));
-    const food = new Entity(Math.random() * this.width, Math.random() * this.height, radius);
-    this.entities[nanoid(8)] = food;
+    // do initialize stuff
   }
 
   createPlayer (sessionId: string) {
     this.entities[sessionId] = new Entity(
       Math.random() * this.width,
       Math.random() * this.height,
-      DEFAULT_PLAYER_RADIUS
+      DEFAULT_PLAYER_RADIUS,
+      DEFAULT_PLAYER_TYPE
+    );
+  }
+
+  createProjectile (sessionId: string) {
+    this.entities[sessionId] = new Entity(
+      Math.random() * this.width,
+      Math.random() * this.height,
+      DEFAULT_PLAYER_RADIUS,
+      DEFAULT_PROJECTILE_TYPE
     );
   }
 
@@ -44,7 +50,7 @@ export class State extends Schema {
         continue;
       }
 
-      if (entity.radius >= DEFAULT_PLAYER_RADIUS) {
+      if (entity.type === DEFAULT_PLAYER_TYPE) {
         for (const collideSessionId in this.entities) {
           const collideTestEntity = this.entities[collideSessionId]
 
@@ -67,7 +73,7 @@ export class State extends Schema {
 
             // create a replacement food
             if (collideTestEntity.radius < DEFAULT_PLAYER_RADIUS) {
-              this.createFood();
+              // this.createFood();
 
             } else {
               console.log(loserEntityId, "has been eaten!");

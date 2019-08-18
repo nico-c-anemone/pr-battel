@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import * as Viewport from "pixi-viewport";
 import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
+import { Entity } from "../server/rooms/Entity";
 
 const characterImage = require('./florp.png')
 console.log(characterImage) // /character.f3137b4d.png
@@ -17,8 +18,8 @@ export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 const FlorpTexture = PIXI.Texture.from(characterImage);
 
 export class Application extends PIXI.Application {
-    entities: { [id: string]: PIXI.Graphics } = {};
-    currentPlayerEntity: PIXI.Graphics;
+    entities: { [id: string]: Entity } = {};
+    currentPlayerEntity: PIXI.Sprite;
 
     client = new Client(ENDPOINT);
     room = this.client.join<State>("arena", {});
@@ -74,30 +75,25 @@ export class Application extends PIXI.Application {
 
         this.interpolation = false;
 
+        this.viewport.on('mousedown', (e) => {
+          if (this.currentPlayerEntity) {
+              const point = this.viewport.toLocal(e.data.global);
+              console.log ("mouse down! ",point.x, point.y);
+              this.room.send(['down', { x: point.x, y: point.y }]);
+          }
+      });
+
         this.viewport.on("mousemove", (e) => {
             if (this.currentPlayerEntity) {
                 const point = this.viewport.toLocal(e.data.global);
                 this.room.send(['mouse', { x: point.x, y: point.y }]);
             }
         });
+
     }
 
     initializeSchema() {
         this.room.state.entities.onAdd = (entity, sessionId: string) => {
-            const color = (entity.radius < 10)
-                ? 0xff0000
-                : 0xFFFF0B;
-
-            const graphics = new PIXI.Graphics();
-            graphics.lineStyle(0);
-            graphics.beginFill(color, 0.5);
-            graphics.drawCircle(0, 0, entity.radius);
-            graphics.endFill();
-
-            graphics.x = entity.x;
-            graphics.y = entity.y;
-            this.viewport.addChild(graphics);
-
             let bunny = new PIXI.Sprite(FlorpTexture);
 
             // center the sprite's anchor point
@@ -109,40 +105,24 @@ export class Application extends PIXI.Application {
 
             this.viewport.addChild(bunny);
 
-            this.entities[sessionId] = graphics;
-
             // detecting current user
             if (sessionId === this.room.sessionId) {
-                this.currentPlayerEntity = graphics;
+                this.currentPlayerEntity = bunny;
                 this.viewport.follow(this.currentPlayerEntity);
             }
 
             entity.onChange = (changes) => {
-                console.log("entity change: ", entity.x, entity.y);
-                const color = (entity.radius < 10) ? 0xff0000 : 0xFFFF0B;
-
-                const graphics = this.entities[sessionId];
-
-                // set x/y directly if interpolation is turned off
-                if (!this._interpolation) {
-                    graphics.x = entity.x;
-                    graphics.y = entity.y;
-                }
+                // console.log("entity change: ", entity.x, entity.y);
 
                 bunny.x = entity.x;
                 bunny.y = entity.y;
 
-                graphics.clear();
-                graphics.lineStyle(0);
-                graphics.beginFill(color, 0.5);
-                graphics.drawCircle(0, 0, entity.radius);
-                graphics.endFill();
             }
         }
 
         this.room.state.entities.onRemove = (_, sessionId: string) => {
-            this.viewport.removeChild(this.entities[sessionId]);
-            this.entities[sessionId].destroy();
+            // this.viewport.removeChild(this.entities[sessionId]);
+            // this.entities[sessionId].destroy();
             delete this.entities[sessionId];
         }
     }
@@ -151,44 +131,32 @@ export class Application extends PIXI.Application {
         // add / removal of entities
         this.room.listen("entities/:id", (change) => {
             if (change.operation === "add") {
-                const color = (change.value.radius < 10)
-                    ? 0xff0000
-                    : 0xFFFF0B;
+                let bunny = new PIXI.Sprite(FlorpTexture);
 
-                const graphics = new PIXI.Graphics();
-                graphics.lineStyle(0);
-                graphics.beginFill(color, 0.5);
-                graphics.drawCircle(0, 0, change.value.radius);
-                graphics.endFill();
+                // center the sprite's anchor point
+                bunny.anchor.set(0.5);
 
-                graphics.x = change.value.x;
-                graphics.y = change.value.y;
-                this.viewport.addChild(graphics);
+                // move the sprite to the center of the screen
+                bunny.x = change.value.x;
+                bunny.y = change.value.y;
 
-                this.entities[change.path.id] = graphics;
+                this.viewport.addChild(bunny);
 
                 // detecting current user
                 if (change.path.id === this.room.sessionId) {
-                    this.currentPlayerEntity = graphics;
+                    this.currentPlayerEntity = bunny;
                     this.viewport.follow(this.currentPlayerEntity);
                 }
 
             } else if (change.operation === "remove") {
-                this.viewport.removeChild(this.entities[change.path.id]);
-                this.entities[change.path.id].destroy();
+                //this.viewport.removeChild(this.entities[change.path.id]);
+                //this.entities[change.path.id].destroy();
                 delete this.entities[change.path.id];
             }
         });
 
         this.room.listen("entities/:id/radius", (change) => {
-            const color = (change.value < 10) ? 0xff0000 : 0xFFFF0B;
-
-            const graphics = this.entities[change.path.id];
-            graphics.clear();
-            graphics.lineStyle(0);
-            graphics.beginFill(color, 0.5);
-            graphics.drawCircle(0, 0, change.value);
-            graphics.endFill();
+            //
         });
     }
 
