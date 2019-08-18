@@ -3,6 +3,9 @@ import * as Viewport from "pixi-viewport";
 import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
 
+const characterImage = require('./florp.png')
+console.log(characterImage) // /character.f3137b4d.png
+
 const ENDPOINT = (process.env.NODE_ENV==="development")
     ? "ws://localhost:8080"
     : "wss://pr-battel.herokuapp.com";
@@ -11,7 +14,7 @@ const WORLD_SIZE = 2000;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
-const FlorpTexture = PIXI.Texture.from('florp.png');
+const FlorpTexture = PIXI.Texture.from(characterImage);
 
 export class Application extends PIXI.Application {
     entities: { [id: string]: PIXI.Graphics } = {};
