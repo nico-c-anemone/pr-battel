@@ -38,7 +38,7 @@ export class State extends Schema {
     this.entities[sessionId] = new Entity(
       Math.random() * this.width,
       Math.random() * this.height,
-      DEFAULT_PLAYER_RADIUS,
+      DEFAULT_PROJECTILE_RADIUS,
       DEFAULT_PROJECTILE_TYPE
     );
   }

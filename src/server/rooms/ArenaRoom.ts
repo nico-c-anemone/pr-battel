@@ -37,6 +37,7 @@ export class ArenaRoom extends Room<State> {
     if (command === "down") {
       console.log('mouse down!');
       console.log(data);
+      this.state.createProjectile(client.sessionId);
     }
   }
 

@@ -17,8 +17,9 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## TODO:
 
-[] add attributions
-[] actually cide the 'game' part of the game 
+[] add
+
+[] actually code the 'game' part of the game
 
 ## License
 
