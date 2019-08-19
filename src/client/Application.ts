@@ -4,18 +4,26 @@ import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
 import { Entity } from "../server/rooms/Entity";
 
-const characterImage = require('./florp.png')
-console.log(characterImage) // /character.f3137b4d.png
+const characterImage = require('./florpmap.png');
+
+
+
+
 
 const ENDPOINT = (process.env.NODE_ENV==="development")
     ? "ws://localhost:8080"
     : "wss://pr-battel.herokuapp.com";
 
-const WORLD_SIZE = 2000;
+const WORLD_SIZE = 1000;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
-const FlorpTexture = PIXI.Texture.from(characterImage);
+const FlorpTextureSheet = PIXI.BaseTexture.from(characterImage);
+//var frames = [new PIXI.Rectangle( 0, 0, 96, 96), new PIXI.Rectangle( 97, 0, 192, 96)];
+//var tex = frames.map(function(frame) { return new PIXI.Texture(FlorpTextureSheet, frame); });
+
+let frames = [];
+let tex = undefined
 
 export class Application extends PIXI.Application {
     entities: { [id: string]: Entity } = {};
@@ -35,7 +43,7 @@ export class Application extends PIXI.Application {
         super({
             width: window.innerWidth,
             height: window.innerHeight,
-            backgroundColor: 0x0c0c0c
+            backgroundColor: 0x220c0c
         });
 
         this.viewport = new Viewport({
@@ -45,7 +53,14 @@ export class Application extends PIXI.Application {
             worldHeight: WORLD_SIZE,
         });
 
+        // load in character graphics
+        for (let i=0;i<8;i++) {
+          for (let j=0;j<8;j++) {
+            frames.push(new PIXI.Rectangle( i*96, j*96, 95, 95));
+          }
+        }
 
+        tex = frames.map(function(frame) { return new PIXI.Texture(FlorpTextureSheet, frame); });
 
         // draw boundaries of the world
         const boundaries = new PIXI.Graphics();
@@ -73,7 +88,7 @@ export class Application extends PIXI.Application {
             }
         });
 
-        this.interpolation = false;
+        this.interpolation = true;
 
         this.viewport.on('mousedown', (e) => {
           if (this.currentPlayerEntity) {
@@ -94,7 +109,9 @@ export class Application extends PIXI.Application {
 
     initializeSchema() {
         this.room.state.entities.onAdd = (entity, sessionId: string) => {
-            let bunny = new PIXI.Sprite(FlorpTexture);
+            let model = entity.model;
+            console.log("schema model: ", model);
+            let bunny = new PIXI.Sprite(tex[model]);
 
             // center the sprite's anchor point
             bunny.anchor.set(0.5);
@@ -131,7 +148,9 @@ export class Application extends PIXI.Application {
         // add / removal of entities
         this.room.listen("entities/:id", (change) => {
             if (change.operation === "add") {
-                let bunny = new PIXI.Sprite(FlorpTexture);
+              let model = this.entities[change.path.id].model;
+              console.log("fossil model: ", model);
+              let bunny = new PIXI.Sprite(tex[model]);
 
                 // center the sprite's anchor point
                 bunny.anchor.set(0.5);

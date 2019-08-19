@@ -2,13 +2,15 @@ import nanoid from "nanoid";
 import { Entity } from "./Entity";
 import { Schema, type, MapSchema } from "@colyseus/schema";
 
-const WORLD_SIZE = 2000;
+const WORLD_SIZE = 1000;
 
 const DEFAULT_PLAYER_RADIUS = 10;
 const DEFAULT_PROJECTILE_RADIUS = 5;
 
 const DEFAULT_PLAYER_TYPE = 0;
 const DEFAULT_PROJECTILE_TYPE = 1;
+
+const MAX_PLAYER_MODELS = 64;
 
 export class State extends Schema {
 
@@ -29,6 +31,7 @@ export class State extends Schema {
       DEFAULT_PLAYER_RADIUS,
       DEFAULT_PLAYER_TYPE
     );
+    this.entities[sessionId].model = Math.floor(Math.random() * MAX_PLAYER_MODELS);
   }
 
   createProjectile (sessionId: string) {
