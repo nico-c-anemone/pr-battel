@@ -4,8 +4,8 @@ import { Schema, type, MapSchema } from "@colyseus/schema";
 
 const WORLD_SIZE = 1000;
 
-const DEFAULT_PLAYER_RADIUS = 10;
-const DEFAULT_PROJECTILE_RADIUS = 5;
+const DEFAULT_PLAYER_RADIUS = 50;
+const DEFAULT_PROJECTILE_RADIUS = 8;
 
 const DEFAULT_PLAYER_TYPE = 0;
 const DEFAULT_PROJECTILE_TYPE = 1;
@@ -34,14 +34,17 @@ export class State extends Schema {
     this.entities[sessionId].model = Math.floor(Math.random() * MAX_PLAYER_MODELS);
   }
 
-  createProjectile (sessionId: string) {
-    this.entities[sessionId] = new Entity(
-      Math.random() * this.width,
-      Math.random() * this.height,
-      DEFAULT_PROJECTILE_RADIUS,
-      DEFAULT_PROJECTILE_TYPE
-    );
+  createProjectile (sessionId: string, speed:number, angle: number) {
+    const radius = DEFAULT_PROJECTILE_RADIUS;
+    const parentEntity = this.entities[sessionId];
+    const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE);
+    projectile.parentEntity = parentEntity;
+    projectile.speed = speed;
+    projectile.angle = angle;
+    this.entities[nanoid(8)] = projectile;
   }
+
+
 
   update() {
     const deadEntities: string[] = [];
@@ -53,7 +56,7 @@ export class State extends Schema {
         continue;
       }
 
-      if (entity.type === DEFAULT_PLAYER_TYPE) {
+      if (entity.type === DEFAULT_PLAYER_TYPE && !entity.knockedOut) {
         for (const collideSessionId in this.entities) {
           const collideTestEntity = this.entities[collideSessionId]
 
@@ -62,38 +65,45 @@ export class State extends Schema {
             continue;
           }
 
+          // prevent collision with parent
+          if (collideTestEntity.parentEntity === entity) {
+            continue;
+          }
+
+          // am i getting shot??
           if (
-            entity.radius > collideTestEntity.radius &&
-            Entity.distance(entity, collideTestEntity) <= entity.radius - (collideTestEntity.radius / 2)
+            collideTestEntity.type === DEFAULT_PROJECTILE_TYPE &&
+            Entity.distance(entity, collideTestEntity) <= entity.radius // - (collideTestEntity.radius / 2)
           ) {
-            let winnerEntity: Entity = entity;
-            let loserEntity: Entity = collideTestEntity;
-            let loserEntityId: string = collideSessionId;
 
-            winnerEntity.radius += loserEntity.radius / 5;
-            loserEntity.dead = true;
-            deadEntities.push(loserEntityId);
+            // knock out player
+            entity.knockedOut = true;
 
-            // create a replacement food
-            if (collideTestEntity.radius < DEFAULT_PLAYER_RADIUS) {
-              // this.createFood();
+            // kill projectile
+            collideTestEntity.dead = true;
+            deadEntities.push(collideTestEntity);
 
-            } else {
-              console.log(loserEntityId, "has been eaten!");
-            }
+            console.log (sessionId, " knocked out.");
           }
         }
       }
 
-      if (entity.speed > 0) {
+      if (entity.speed > 0 && !entity.knockedOut) {
         entity.x -= (Math.cos(entity.angle)) * entity.speed;
         entity.y -= (Math.sin(entity.angle)) * entity.speed;
 
         // apply boundary limits
-        if (entity.x < 0) { entity.x = 0; }
-        if (entity.x > WORLD_SIZE) { entity.x = WORLD_SIZE; }
-        if (entity.y < 0) { entity.y = 0; }
-        if (entity.y > WORLD_SIZE) { entity.y = WORLD_SIZE; }
+        if (entity.type === DEFAULT_PLAYER_TYPE) {
+          if (entity.x < 0) { entity.x = 0; }
+          if (entity.x > WORLD_SIZE) { entity.x = WORLD_SIZE; }
+          if (entity.y < 0) { entity.y = 0; }
+          if (entity.y > WORLD_SIZE) { entity.y = WORLD_SIZE; }
+        } else if (entity.type===DEFAULT_PROJECTILE_TYPE) {
+          if (entity.x < 0 || entity.x > WORLD_SIZE || entity.y < 0 || entity.y > WORLD_SIZE) {
+            entity.dead = true;
+            deadEntities.push(entity);
+          }
+        }
       }
     }
 

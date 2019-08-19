@@ -132,6 +132,11 @@ export class Application extends PIXI.Application {
       entity.onChange = (changes) => {
         // move sprite with entity
         this.stop();
+        if (entity.knockedOut) {
+          sprite.visible = false;
+        } else {
+          sprite.visible = true;
+        }
         sprite.x = entity.x;
         sprite.y = entity.y;
         this.start();

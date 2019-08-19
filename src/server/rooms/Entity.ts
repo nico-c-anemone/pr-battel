@@ -6,10 +6,13 @@ export class Entity extends Schema {
     @type("number") radius: number;
     @type("number") model: number;
     @type("number") type: number;
+    @type("boolean") knockedOut: boolean;
 
     dead: boolean = false;
+
     angle: number = 0;
     speed = 0;
+    parentEntity: Entity = this;
 
     constructor(x: number, y: number, radius: number, type: number) {
         super();
@@ -19,6 +22,7 @@ export class Entity extends Schema {
         this.radius = radius;
         this.type = type;
         this.model = 0;
+        this.knockedOut = false;
     }
 
     static distance(a: Entity, b: Entity) {

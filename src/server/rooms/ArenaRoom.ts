@@ -18,26 +18,33 @@ export class ArenaRoom extends Room<State> {
   onMessage(client: Client, message: any) {
     const entity = this.state.entities[client.sessionId];
 
+    const [command, data] = message;
+
     // skip dead players
     if (!entity) {
-      console.log("DEAD PLAYER ACTING...");
+      // do nothing console.log("DEAD PLAYER ACTING...");
       return;
     }
 
-    const [command, data] = message;
-
-  // change angle
+    // change angle
     if (command === "mouse") {
       const dst = Entity.distance(entity, data as Entity);
       entity.speed = (dst < 20) ? 0 : Math.min(dst / 15, 4);
       entity.angle = Math.atan2(entity.y - data.y, entity.x - data.x);
     }
 
-  // fire projectile
+    // fire projectile
     if (command === "down") {
-      console.log('mouse down!');
-      console.log(data);
-      this.state.createProjectile(client.sessionId);
+      if (entity.knockedOut) {
+        this.state.createPlayer(client.sessionId);
+      } else {
+        console.log('mouse down!');
+        console.log(data);
+        const dst = Entity.distance(entity, data as Entity);
+        let speed = 12;
+        let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
+        this.state.createProjectile(client.sessionId, speed, angle);
+      }
     }
   }
 
