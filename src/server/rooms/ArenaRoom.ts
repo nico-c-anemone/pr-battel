@@ -85,7 +85,7 @@ export class ArenaRoom extends Room<State> {
       if (entity.knockedOut) {
         this.state.revivePlayer(client.sessionId);
         return;
-      } else {
+      } else if (entity.coolDown <= 0) {
         let vapeSpead:number = 3.0;
         let vapeSpread:number = 0.25;
         let vapePuffs=3;
@@ -95,6 +95,7 @@ export class ArenaRoom extends Room<State> {
         for (let i=0; i<vapePuffs; i++) {
           this.state.createProjectile(client.sessionId, speed+(Math.random()*vapeSpead)-(vapeSpead*0.5), angle+(Math.random()*vapeSpread)-(vapeSpread*0.5));
         }
+        entity.coolDown = 18;
       }
     }
   }
