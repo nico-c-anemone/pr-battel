@@ -23,14 +23,17 @@ const FlorpTextureSheet = PIXI.BaseTexture.from(characterImage);
 let frames = [];
 let tex = undefined
 
+// key stuff
+let pkeys=[];
+
 const PixelTexture = PIXI.Texture.from(pixelImage);
+
+const client = new Client(ENDPOINT);
+const room = client.join<State>("arena", {});
 
 export class Application extends PIXI.Application {
   entities: { [id: string]: Entity } = {};
   currentPlayerEntity: PIXI.Sprite;
-
-  client = new Client(ENDPOINT);
-  room = this.client.join<State>("arena", {});
 
   viewport: Viewport;
 
@@ -79,7 +82,7 @@ export class Application extends PIXI.Application {
     // add viewport to stage
     this.stage.addChild(this.viewport);
 
-    this.room.onJoin.add(() => {
+    room.onJoin.add(() => {
       this.initializeSchema();
     });
 
@@ -89,21 +92,40 @@ export class Application extends PIXI.Application {
       if (this.currentPlayerEntity) {
         const point = this.viewport.toLocal(e.data.global);
         console.log ("mouse down! ",point.x, point.y);
-        this.room.send(['down', { x: point.x, y: point.y }]);
+        room.send(['down', { x: point.x, y: point.y }]);
       }
     });
 
     this.viewport.on("mousemove", (e) => {
       if (this.currentPlayerEntity) {
         const point = this.viewport.toLocal(e.data.global);
-        this.room.send(['mouse', { x: point.x, y: point.y }]);
+        room.send(['mouse', { x: point.x, y: point.y }]);
       }
+    });
+
+    function handleKeys () {
+      let w:boolean=pkeys[87], a:boolean=pkeys[65],
+        s:boolean=pkeys[83], d:boolean=pkeys[68];
+      room.send(["key",{w: w, a:a,s:s,d:d }]);
+    }
+
+    // keyboard control functions
+    document.addEventListener('keydown', function(e) {
+      var code = e.keyCode ? e.keyCode : e.which;
+      pkeys[code]=true;
+      handleKeys();
+    });
+
+    document.addEventListener('keyup', function(e) {
+      var code = e.keyCode ? e.keyCode : e.which;
+      pkeys[code]=false;
+      handleKeys();
     });
 
   }
 
   initializeSchema() {
-    this.room.state.entities.onAdd = (entity, sessionId: string) => {
+    room.state.entities.onAdd = (entity, sessionId: string) => {
       let model = entity.model;
       console.log("schema model: ", model);
       let sprite = undefined;
@@ -122,7 +144,7 @@ export class Application extends PIXI.Application {
       sprite.y = entity.y;
 
       // detecting current user
-      if (sessionId === this.room.sessionId) {
+      if (sessionId === room.sessionId) {
         this.currentPlayerEntity = sprite;
         this.viewport.follow(this.currentPlayerEntity);
       }
@@ -149,7 +171,7 @@ export class Application extends PIXI.Application {
       }
     }
 
-    this.room.state.entities.onRemove = (_, sessionId: string) => {
+    room.state.entities.onRemove = (_, sessionId: string) => {
       delete this.entities[sessionId];
     }
   }
@@ -164,18 +186,23 @@ export class Application extends PIXI.Application {
 
   loop () {
     for (let id in this.entities) {
-      this.entities[id].x = lerp(this.entities[id].x, this.room.state.entities[id].x, 0.2);
-      this.entities[id].y = lerp(this.entities[id].y, this.room.state.entities[id].y, 0.2);
+      this.entities[id].x = lerp(this.entities[id].x, room.state.entities[id].x, 0.2);
+      this.entities[id].y = lerp(this.entities[id].y, room.state.entities[id].y, 0.2);
     }
 
     this.backgroundHue+=0.1;
-
     this.renderer.backgroundColor = hslToNumber(this.backgroundHue%360, 0.5, 0.5);
 
     // continue looping if interpolation is still enabled.
     if (this._interpolation) {
       requestAnimationFrame(this.loop.bind(this));
     }
+  }
+
+  message (msg) {
+      if (room!=undefined) {
+    room.send(msg);
+  }
   }
 }
 

@@ -34,6 +34,13 @@ export class State extends Schema {
     this.entities[sessionId].model = Math.floor(Math.random() * MAX_PLAYER_MODELS);
   }
 
+  revivePlayer (sessionId: string) {
+    let entity = this.entities[sessionId];
+    entity.x = Math.random() * this.width;
+    entity.y = Math.random() * this.height;
+    entity.knockedOut = false;    
+  }
+
   createProjectile (sessionId: string, speed:number, angle: number) {
     const radius = DEFAULT_PROJECTILE_RADIUS;
     const parentEntity = this.entities[sessionId];
