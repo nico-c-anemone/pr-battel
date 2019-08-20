@@ -108,8 +108,9 @@ export class Application extends PIXI.Application {
 
     function handleKeys () {
       let w:boolean=pkeys[87], a:boolean=pkeys[65],
-      s:boolean=pkeys[83], d:boolean=pkeys[68];
-      room.send(["key",{w: w, a:a,s:s,d:d }]);
+      s:boolean=pkeys[83], d:boolean=pkeys[68],
+      e:boolean=pkeys[69];
+      room.send(["key",{w: w, a:a,s:s,d:d, e:e }]);
     }
 
     // keyboard control functions
@@ -188,7 +189,7 @@ export class Application extends PIXI.Application {
         });
 
         killsText = new PIXI.Text(kills, style);
-        kills = "Please select your character\nusing W and S keys\nclick mouse to join game.";
+        kills = "Please select your character\nusing A and D keys\npress E to join game.";
         killsText.text = kills;
         killsText.x = sprite.x+killXOffset;
         killsText.y = sprite.y+killYOffset;
@@ -250,7 +251,7 @@ export class Application extends PIXI.Application {
           nameText.x = sprite.x+nameXOffset;
           nameText.y = sprite.y+nameYOffset;
         } else {
-          kills = "Please select your character\nusing W and S keys\nclick mouse to join game.";
+          kills = "Please select your character\nusing A and D keys\npress E to join game.";
           killsText.text = kills;
           killsText.x = sprite.x+killXOffset;
           killsText.y = sprite.y+killYOffset;
@@ -302,7 +303,7 @@ export class Application extends PIXI.Application {
       this.entities[id].y = lerp(this.entities[id].y, room.state.entities[id].y, 0.2);
     }
 
-    this.backgroundHue+=0.1;
+    this.backgroundHue+=0.25;
     this.renderer.backgroundColor = hslToNumber(this.backgroundHue%360, 0.5, 0.5);
 
     // continue looping if interpolation is still enabled.

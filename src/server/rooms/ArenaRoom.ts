@@ -87,7 +87,12 @@ export class ArenaRoom extends Room<State> {
         if (entity.model < 0)
           entity.model = MAX_PLAYER_MODELS - 1;
         this.state.setPlayerCharacter(client.sessionId);
-        console.log ("entity.model: ",entity.model, "entity.name: ",entity.name);        
+        console.log ("entity.model: ",entity.model, "entity.name: ",entity.name);
+
+        if (data.e) {
+          entity.characterSelected=true;
+          this.state.randomizePlayerLocation(client.sessionId);
+        }
       }
     }
 
@@ -117,9 +122,6 @@ export class ArenaRoom extends Room<State> {
           }
           entity.coolDown = 18;
         }
-      } else {
-        // select character
-        entity.characterSelected = true;
       }
     }
   }

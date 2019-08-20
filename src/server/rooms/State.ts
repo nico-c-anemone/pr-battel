@@ -39,8 +39,8 @@ const CHARACTERS = [
       let character: number = Math.floor(Math.random() * MAX_PLAYER_MODELS); // random model
 
       this.entities[sessionId] = new Entity(
-        Math.random() * this.width,
-        Math.random() * this.height,
+        this.width/2,
+        this.height/2,
         DEFAULT_PLAYER_RADIUS,
         DEFAULT_PLAYER_TYPE,
         character
@@ -63,9 +63,14 @@ const CHARACTERS = [
 
     revivePlayer (sessionId: string) {
       let entity = this.entities[sessionId];
+      this.randomizePlayerLocation
+      entity.knockedOut = false;
+    }
+
+    randomizePlayerLocation (sessionId: string) {
+      let entity = this.entities[sessionId];
       entity.x = Math.random() * this.width;
       entity.y = Math.random() * this.height;
-      entity.knockedOut = false;
     }
 
     createProjectile (sessionId: string, speed:number, angle: number) {
