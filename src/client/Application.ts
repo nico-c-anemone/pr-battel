@@ -208,8 +208,13 @@ export class Application extends PIXI.Application {
       entity.onChange = (changes) => {
         this.stop(); // stope rendering while we moved stuff around
 
+        for (let id in changes) {
+          if (changes[id].field=="model")
+            sprite.texture = tex[entity.model];
+        }
+
         // if this is the current player
-        if (sessionId === room.sessionId) {
+        if (current) {
 
           // if the character is not yet selected
           if (!entity.characterSelected) {
@@ -221,6 +226,8 @@ export class Application extends PIXI.Application {
 
             if (entity.knockedOut) {
               sprite.visible=false;
+            } else {
+              sprite.visible=true;
             }
           }
         } else { //if it is not the current player

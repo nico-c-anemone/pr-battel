@@ -63,7 +63,7 @@ const CHARACTERS = [
 
     revivePlayer (sessionId: string) {
       let entity = this.entities[sessionId];
-      this.randomizePlayerLocation
+      this.randomizePlayerLocation (sessionId);
       entity.knockedOut = false;
     }
 
