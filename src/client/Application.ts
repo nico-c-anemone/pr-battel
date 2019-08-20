@@ -127,7 +127,7 @@ export class Application extends PIXI.Application {
   initializeSchema() {
     room.state.entities.onAdd = (entity, sessionId: string) => {
       let model = entity.model;
-      console.log("schema model: ", model);
+      console.log("model: ", model);
       let sprite = undefined;
 
       if (entity.type===DEFAULT_PLAYER_TYPE) {
@@ -151,6 +151,30 @@ export class Application extends PIXI.Application {
 
       this.viewport.addChild(sprite);
 
+      let killsText:any;
+      let kills :string;
+
+
+      if (entity.type===DEFAULT_PLAYER_TYPE)
+      {
+
+      kills = "kills: " + entity.kills;
+
+      const style = new PIXI.TextStyle({
+    fontFamily: '"Courier New", Courier, monospace',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fill: ['#ffffff'], // gradient
+});
+
+killsText = new PIXI.Text(kills, style);
+killsText.x = sprite.x-30;
+killsText.y = sprite.y+45;
+
+
+      this.viewport.addChild(killsText);
+    }
+
       entity.onChange = (changes) => {
         // move sprite with entity
         this.stop();
@@ -161,6 +185,13 @@ export class Application extends PIXI.Application {
         }
         sprite.x = entity.x;
         sprite.y = entity.y;
+        if (entity.type===DEFAULT_PLAYER_TYPE)
+        {
+          kills = "kills: " + entity.kills;
+          killsText.text = kills;
+          killsText.x = sprite.x-30;
+          killsText.y = sprite.y+45;
+        }
         this.start();
       }
 
@@ -197,12 +228,6 @@ export class Application extends PIXI.Application {
     if (this._interpolation) {
       requestAnimationFrame(this.loop.bind(this));
     }
-  }
-
-  message (msg) {
-      if (room!=undefined) {
-    room.send(msg);
-  }
   }
 }
 

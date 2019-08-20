@@ -30,39 +30,39 @@ export class ArenaRoom extends Room<State> {
     }
 
     if (command === "key") {
-      if ((!data.w && data.a && !data.s && !data.d)||
+      if ((!data.w && data.a && !data.s && !data.d)|| // A
       (data.w && data.a && data.s && !data.d)) {
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = 0; // 90 degrees
       } else
-      if (data.w && data.a && !data.s && !data.d) {
+      if (data.w && data.a && !data.s && !data.d) { // A+W
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = 0.7853982; // 45 degrees
       } else
-      if ((data.w && !data.a && !data.s && !data.d)||
+      if ((data.w && !data.a && !data.s && !data.d)|| // W
       (data.w && data.a && !data.s && data.d)) {
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = 1.570796; // 90 degrees
       } else
-      if (data.w && !data.a && !data.s && data.d) {
+      if (data.w && !data.a && !data.s && data.d) { // W+D
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = 2.356194; // 135 degrees
       } else
-      if ((!data.w && !data.a && !data.s && data.d)||
+      if ((!data.w && !data.a && !data.s && data.d)|| // D
       (data.w && !data.a && data.s && data.d)) {
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = 3.141593; // 180 degrees
       } else
-      if (!data.w && !data.a && data.s && data.d) {
+      if (!data.w && !data.a && data.s && data.d) { // S+D
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = -2.356194; // -135 degrees
       } else
-      if ((!data.w && !data.a && data.s && !data.d)||
+      if ((!data.w && !data.a && data.s && !data.d)|| // S
       (!data.w && data.a && data.s && data.d)) {
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = -1.570796; // -90 degrees
       } else
-      if (!data.w && data.a && data.s && !data.d) {
+      if (!data.w && data.a && data.s && !data.d) { // A+S
         entity.speed = DEFAULT_PLAYER_SPEED;
         entity.angle = -0.7853982; // -45 degrees
       } else

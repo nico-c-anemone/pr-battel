@@ -7,6 +7,7 @@ export class Entity extends Schema {
     @type("number") model: number;
     @type("number") type: number;
     @type("boolean") knockedOut: boolean;
+    @type("number") kills: number;
 
     dead: boolean = false;
 
@@ -23,6 +24,7 @@ export class Entity extends Schema {
         this.type = type;
         this.model = 0;
         this.knockedOut = false;
+        this.kills = 0;
     }
 
     static distance(a: Entity, b: Entity) {

@@ -38,7 +38,7 @@ export class State extends Schema {
     let entity = this.entities[sessionId];
     entity.x = Math.random() * this.width;
     entity.y = Math.random() * this.height;
-    entity.knockedOut = false;    
+    entity.knockedOut = false;
   }
 
   createProjectile (sessionId: string, speed:number, angle: number) {
@@ -85,6 +85,8 @@ export class State extends Schema {
 
             // knock out player
             entity.knockedOut = true;
+
+            collideTestEntity.parentEntity.kills++;
 
             // kill projectile
             collideTestEntity.dead = true;
