@@ -4,8 +4,6 @@ const app = new Application();
 app.interpolation = true;
 document.body.appendChild(app.view);
 
-app.interpolation = true;
-
 // allow to resize viewport and renderer
 window.onresize = () => {
     app.viewport.resize(window.innerWidth, window.innerHeight);

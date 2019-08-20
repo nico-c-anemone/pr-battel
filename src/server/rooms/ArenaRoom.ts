@@ -86,10 +86,15 @@ export class ArenaRoom extends Room<State> {
         this.state.revivePlayer(client.sessionId);
         return;
       } else {
+        let vapeSpead:number = 3.0;
+        let vapeSpread:number = 0.25;
+        let vapePuffs=3;
         const dst = Entity.distance(entity, data as Entity);
         let speed = DEFAULT_PROJECTILE_SPEED;
         let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
-        this.state.createProjectile(client.sessionId, speed, angle);
+        for (let i=0; i<vapePuffs; i++) {
+          this.state.createProjectile(client.sessionId, speed+(Math.random()*vapeSpead)-(vapeSpead*0.5), angle+(Math.random()*vapeSpread)-(vapeSpread*0.5));
+        }
       }
     }
   }

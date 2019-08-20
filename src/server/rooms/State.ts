@@ -10,7 +10,12 @@ const DEFAULT_PROJECTILE_RADIUS = 8;
 const DEFAULT_PLAYER_TYPE = 0;
 const DEFAULT_PROJECTILE_TYPE = 1;
 
-const MAX_PLAYER_MODELS = 64;
+const VAPE_PROJECTILE_SUBTYPE = 1;
+const VAPE_PROJECTILE_COOLDOWN = 25;
+
+const MAX_PLAYER_MODELS = 2;
+
+const PLAYER_NAMES = ["babysnakes", "vic", "other"];
 
 export class State extends Schema {
 
@@ -25,13 +30,20 @@ export class State extends Schema {
   }
 
   createPlayer (sessionId: string) {
+    let character: number = 1; // vic
+
+    // let character: number = Math.floor(Math.random() * MAX_PLAYER_MODELS); // random model
+
     this.entities[sessionId] = new Entity(
       Math.random() * this.width,
       Math.random() * this.height,
       DEFAULT_PLAYER_RADIUS,
-      DEFAULT_PLAYER_TYPE
+      DEFAULT_PLAYER_TYPE,
+      character
     );
-    this.entities[sessionId].model = Math.floor(Math.random() * MAX_PLAYER_MODELS);
+
+    this.entities[sessionId].model = character;
+    this.entities[sessionId].name = PLAYER_NAMES[character];
   }
 
   revivePlayer (sessionId: string) {
@@ -44,10 +56,11 @@ export class State extends Schema {
   createProjectile (sessionId: string, speed:number, angle: number) {
     const radius = DEFAULT_PROJECTILE_RADIUS;
     const parentEntity = this.entities[sessionId];
-    const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE);
+    const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE, VAPE_PROJECTILE_SUBTYPE);
     projectile.parentEntity = parentEntity;
     projectile.speed = speed;
     projectile.angle = angle;
+    projectile.coolDown = VAPE_PROJECTILE_COOLDOWN;
     this.entities[nanoid(8)] = projectile;
   }
 
@@ -97,9 +110,28 @@ export class State extends Schema {
         }
       }
 
+      // cooldown for various mechanics
+      if (entity.coolDown>0)
+        entity.coolDown--;
+      else
+        entity.coolDown=0;
+
+
+      if (entity.type === DEFAULT_PROJECTILE_TYPE) {
+        if (entity.coolDown<=0) {
+          entity.dead = true;
+          deadEntities.push(entity);
+        }
+      }
+
       if (entity.speed > 0 && !entity.knockedOut) {
         entity.x -= (Math.cos(entity.angle)) * entity.speed;
         entity.y -= (Math.sin(entity.angle)) * entity.speed;
+        if ((entity.type === DEFAULT_PROJECTILE_TYPE)&&
+            (entity.subType === VAPE_PROJECTILE_SUBTYPE)) {
+              //console.log (entity.angle);
+          // entity.y-=(25-entity.coolDown)/2; //vape smoke rises
+        }
 
         // apply boundary limits
         if (entity.type === DEFAULT_PLAYER_TYPE) {

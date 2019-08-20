@@ -6,8 +6,12 @@ export class Entity extends Schema {
     @type("number") radius: number;
     @type("number") model: number;
     @type("number") type: number;
+    @type("number") subType: number;
     @type("boolean") knockedOut: boolean;
     @type("number") kills: number;
+    @type("number") coolDown: number;
+    @type("string") name: string;
+
 
     dead: boolean = false;
 
@@ -15,16 +19,19 @@ export class Entity extends Schema {
     speed = 0;
     parentEntity: Entity = this;
 
-    constructor(x: number, y: number, radius: number, type: number) {
+    constructor(x: number, y: number, radius: number, type: number, subType: number) {
         super();
 
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.type = type;
+        this.subType = subType;
         this.model = 0;
         this.knockedOut = false;
         this.kills = 0;
+        this.coolDown = 0;
+        this.name='';
     }
 
     static distance(a: Entity, b: Entity) {

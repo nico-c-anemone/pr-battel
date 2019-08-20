@@ -4,7 +4,7 @@ import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
 import { Entity } from "../server/rooms/Entity";
 
-const characterImage = require('./florpmap.png');
+const characterImage = require('./prmap.png');
 const pixelImage = require('./pixel.png');
 
 const ENDPOINT = (process.env.NODE_ENV==="development")
@@ -15,6 +15,9 @@ const WORLD_SIZE = 1000;
 
 const DEFAULT_PLAYER_TYPE = 0;
 const DEFAULT_PROJECTILE_TYPE = 1;
+
+const VAPE_PROJECTILE_SUBTYPE = 1;
+const VAPE_PROJECTILE_COOLDOWN = 25;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
@@ -64,7 +67,7 @@ export class Application extends PIXI.Application {
     // load in character graphics
     for (let i=0;i<8;i++) {
       for (let j=0;j<8;j++) {
-        frames.push(new PIXI.Rectangle( i*96, j*96, 56, 95));
+        frames.push(new PIXI.Rectangle( j*96, i*96, 56, 95));
       }
     }
 
@@ -76,7 +79,7 @@ export class Application extends PIXI.Application {
     // draw boundaries of the world
     const boundaries = new PIXI.Graphics();
     boundaries.beginFill(0x000000);
-    boundaries.drawRoundedRect(0, 0, WORLD_SIZE, WORLD_SIZE, 30);
+    boundaries.drawRoundedRect(0, 0, WORLD_SIZE, WORLD_SIZE, 15);
     this.viewport.addChild(boundaries);
 
     // add viewport to stage
@@ -105,7 +108,7 @@ export class Application extends PIXI.Application {
 
     function handleKeys () {
       let w:boolean=pkeys[87], a:boolean=pkeys[65],
-        s:boolean=pkeys[83], d:boolean=pkeys[68];
+      s:boolean=pkeys[83], d:boolean=pkeys[68];
       room.send(["key",{w: w, a:a,s:s,d:d }]);
     }
 
@@ -130,6 +133,16 @@ export class Application extends PIXI.Application {
       console.log("model: ", model);
       let sprite = undefined;
 
+      let killsText:any; // text for kills
+      let kills :string; // actual string
+      let nameText:any; // text for kills
+      let name :string; // actual string
+
+      let killXOffset = -30;
+      let killYOffset = + 45;
+      let nameXOffset = -30;
+      let nameYOffset = -55;
+
       if (entity.type===DEFAULT_PLAYER_TYPE) {
         sprite = new PIXI.Sprite(tex[model]);
       } else if (entity.type===DEFAULT_PROJECTILE_TYPE) {
@@ -151,29 +164,34 @@ export class Application extends PIXI.Application {
 
       this.viewport.addChild(sprite);
 
-      let killsText:any;
-      let kills :string;
-
+      if ((entity.type===DEFAULT_PROJECTILE_TYPE) &&
+        (entity.subType===VAPE_PROJECTILE_SUBTYPE))
+      {
+         sprite.alpha=entity.coolDown/VAPE_PROJECTILE_COOLDOWN;
+      }
 
       if (entity.type===DEFAULT_PLAYER_TYPE)
       {
 
-      kills = "kills: " + entity.kills;
+        const style = new PIXI.TextStyle({
+          fontFamily: '"Courier New", Courier, monospace',
+          fontSize: 12,
+          fontWeight: 'bold',
+          fill: ['#ffffff'], // gradient
+        });
 
-      const style = new PIXI.TextStyle({
-    fontFamily: '"Courier New", Courier, monospace',
-    fontSize: 12,
-    fontWeight: 'bold',
-    fill: ['#ffffff'], // gradient
-});
+        kills = "kills: " + entity.kills;
+        killsText = new PIXI.Text(kills, style);
+        killsText.x = sprite.x+killXOffset;
+        killsText.y = sprite.y+killYOffset;
+        this.viewport.addChild(killsText);
 
-killsText = new PIXI.Text(kills, style);
-killsText.x = sprite.x-30;
-killsText.y = sprite.y+45;
-
-
-      this.viewport.addChild(killsText);
-    }
+        name = entity.name + "\n" + sessionId;
+        nameText = new PIXI.Text(name, style);
+        nameText.x = sprite.x+nameXOffset;
+        nameText.y = sprite.y+nameYOffset;
+        this.viewport.addChild(nameText);
+      }
 
       entity.onChange = (changes) => {
         // move sprite with entity
@@ -189,8 +207,14 @@ killsText.y = sprite.y+45;
         {
           kills = "kills: " + entity.kills;
           killsText.text = kills;
-          killsText.x = sprite.x-30;
-          killsText.y = sprite.y+45;
+          killsText.x = sprite.x+killXOffset;
+          killsText.y = sprite.y+killYOffset;
+          nameText.x = sprite.x+nameXOffset;
+          nameText.y = sprite.y+nameYOffset;
+        }
+        if (entity.type===DEFAULT_PROJECTILE_TYPE)
+        {
+           sprite.alpha=entity.coolDown/25+0.1;
         }
         this.start();
       }
@@ -199,6 +223,11 @@ killsText.y = sprite.y+45;
         // remove the sprite if entity gets removed
         this.viewport.removeChild(sprite);
         sprite.destroy();
+        if (entity.type===DEFAULT_PLAYER_TYPE)
+        {
+          this.viewport.removeChild(killsText);
+          killsText.destroy();
+        }
       }
     }
 
