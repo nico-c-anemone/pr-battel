@@ -129,9 +129,10 @@ export class Application extends PIXI.Application {
 
   initializeSchema() {
     room.state.entities.onAdd = (entity, sessionId: string) => {
+      // stop rendering until we handle this
       let model = entity.model;
       console.log("model: ", model);
-      let sprite = undefined;
+      let sprite = new PIXI.Sprite();
 
       let killsText:any; // text for kills
       let kills :string; // actual string
@@ -143,11 +144,15 @@ export class Application extends PIXI.Application {
       let nameXOffset = -30;
       let nameYOffset = -55;
 
+      let current : boolean = (sessionId === room.sessionId);
+
       if (entity.type===DEFAULT_PLAYER_TYPE) {
-        sprite = new PIXI.Sprite(tex[model]);
+        sprite.texture=tex[model];
       } else if (entity.type===DEFAULT_PROJECTILE_TYPE) {
-        sprite = new PIXI.Sprite(PixelTexture);
+        sprite.texture=PixelTexture;
       }
+
+
 
       // center the sprite's anchor point
       sprite.anchor.set(0.5);
@@ -157,17 +162,19 @@ export class Application extends PIXI.Application {
       sprite.y = entity.y;
 
       // detecting current user
-      if (sessionId === room.sessionId) {
+      if (current) {
         this.currentPlayerEntity = sprite;
         this.viewport.follow(this.currentPlayerEntity);
       }
 
+      if (entity.type===DEFAULT_PLAYER_TYPE)
+        sprite.visible=current?true:false;
       this.viewport.addChild(sprite);
 
       if ((entity.type===DEFAULT_PROJECTILE_TYPE) &&
-        (entity.subType===VAPE_PROJECTILE_SUBTYPE))
+      (entity.subType===VAPE_PROJECTILE_SUBTYPE))
       {
-         sprite.alpha=entity.coolDown/VAPE_PROJECTILE_COOLDOWN;
+        sprite.alpha=entity.coolDown/VAPE_PROJECTILE_COOLDOWN;
       }
 
       if (entity.type===DEFAULT_PLAYER_TYPE)
@@ -180,43 +187,86 @@ export class Application extends PIXI.Application {
           fill: ['#ffffff'], // gradient
         });
 
-        kills = "kills: " + entity.kills;
         killsText = new PIXI.Text(kills, style);
+        kills = "Please select your character\nusing W and S keys\nclick mouse to join game.";
+        killsText.text = kills;
         killsText.x = sprite.x+killXOffset;
         killsText.y = sprite.y+killYOffset;
+        killsText.visible=current?true:false;
         this.viewport.addChild(killsText);
 
-        name = entity.name + "\n" + sessionId;
         nameText = new PIXI.Text(name, style);
+        name = entity.name;
+        nameText.text = name;
         nameText.x = sprite.x+nameXOffset;
         nameText.y = sprite.y+nameYOffset;
+        nameText.visible=current?true:false;
         this.viewport.addChild(nameText);
       }
 
       entity.onChange = (changes) => {
-        // move sprite with entity
-        this.stop();
-        if (entity.knockedOut) {
-          sprite.visible = false;
-        } else {
-          sprite.visible = true;
+        this.stop(); // stope rendering while we moved stuff around
+
+        // if this is the current player
+        if (sessionId === room.sessionId) {
+
+          // if the character is not yet selected
+          if (!entity.characterSelected) {
+            sprite.visible
+            name = entity.name;
+            nameText.name = name;
+            sprite.texture = tex[entity.model];
+          } else { // if the character is selected
+
+            if (entity.knockedOut) {
+              sprite.visible=false;
+            }
+          }
+        } else { //if it is not the current player
+          if (entity.type===DEFAULT_PLAYER_TYPE){
+          if (!entity.characterSelected || entity.knockedOut)
+          {
+            sprite.visible = false;
+            killsText.visible = false;
+            nameText.visible = false;
+          } else {
+            sprite.visible = true;
+            killsText.visible = true;
+            nameText.visible = true;
+          }
+        }
         }
         sprite.x = entity.x;
         sprite.y = entity.y;
         if (entity.type===DEFAULT_PLAYER_TYPE)
         {
+          if (entity.characterSelected) {
           kills = "kills: " + entity.kills;
           killsText.text = kills;
           killsText.x = sprite.x+killXOffset;
           killsText.y = sprite.y+killYOffset;
+          name = entity.name + "\n" + sessionId;
+          nameText.text = name;
+          nameText.x = sprite.x+nameXOffset;
+          nameText.y = sprite.y+nameYOffset;
+        } else {
+          kills = "Please select your character\nusing W and S keys\nclick mouse to join game.";
+          killsText.text = kills;
+          killsText.x = sprite.x+killXOffset;
+          killsText.y = sprite.y+killYOffset;
+          name = entity.name;
+          nameText.text = name;
           nameText.x = sprite.x+nameXOffset;
           nameText.y = sprite.y+nameYOffset;
         }
+        }
         if (entity.type===DEFAULT_PROJECTILE_TYPE)
         {
-           sprite.alpha=entity.coolDown/25+0.1;
+          sprite.alpha=entity.coolDown/25+0.1;
         }
-        this.start();
+
+        this.start(); //start up the renderer again
+
       }
 
       entity.onRemove = () => {
@@ -225,6 +275,8 @@ export class Application extends PIXI.Application {
         sprite.destroy();
         if (entity.type===DEFAULT_PLAYER_TYPE)
         {
+          this.viewport.removeChild(nameText);
+          nameText.destroy();
           this.viewport.removeChild(killsText);
           killsText.destroy();
         }

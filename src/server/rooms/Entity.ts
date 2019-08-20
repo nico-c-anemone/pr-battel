@@ -11,6 +11,7 @@ export class Entity extends Schema {
     @type("number") kills: number;
     @type("number") coolDown: number;
     @type("string") name: string;
+    @type("boolean") characterSelected: boolean;
 
 
     dead: boolean = false;
@@ -32,6 +33,7 @@ export class Entity extends Schema {
         this.kills = 0;
         this.coolDown = 0;
         this.name='';
+        this.characterSelected=true;
     }
 
     static distance(a: Entity, b: Entity) {

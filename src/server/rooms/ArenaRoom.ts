@@ -5,6 +5,8 @@ import { State } from "./State";
 const DEFAULT_PLAYER_SPEED = 5;
 const DEFAULT_PROJECTILE_SPEED = 12;
 
+const MAX_PLAYER_MODELS = 2;
+
 export class ArenaRoom extends Room<State> {
 
   onInit() {
@@ -30,46 +32,63 @@ export class ArenaRoom extends Room<State> {
     }
 
     if (command === "key") {
-      if ((!data.w && data.a && !data.s && !data.d)|| // A
-      (data.w && data.a && data.s && !data.d)) {
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = 0; // 90 degrees
-      } else
-      if (data.w && data.a && !data.s && !data.d) { // A+W
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = 0.7853982; // 45 degrees
-      } else
-      if ((data.w && !data.a && !data.s && !data.d)|| // W
-      (data.w && data.a && !data.s && data.d)) {
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = 1.570796; // 90 degrees
-      } else
-      if (data.w && !data.a && !data.s && data.d) { // W+D
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = 2.356194; // 135 degrees
-      } else
-      if ((!data.w && !data.a && !data.s && data.d)|| // D
-      (data.w && !data.a && data.s && data.d)) {
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = 3.141593; // 180 degrees
-      } else
-      if (!data.w && !data.a && data.s && data.d) { // S+D
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = -2.356194; // -135 degrees
-      } else
-      if ((!data.w && !data.a && data.s && !data.d)|| // S
-      (!data.w && data.a && data.s && data.d)) {
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = -1.570796; // -90 degrees
-      } else
-      if (!data.w && data.a && data.s && !data.d) { // A+S
-        entity.speed = DEFAULT_PLAYER_SPEED;
-        entity.angle = -0.7853982; // -45 degrees
-      } else
-      {
-        entity.speed = 0;
+      if (entity.characterSelected) {
+        if ((!data.w && data.a && !data.s && !data.d)|| // A
+        (data.w && data.a && data.s && !data.d)) {
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = 0; // 90 degrees
+        } else
+        if (data.w && data.a && !data.s && !data.d) { // A+W
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = 0.7853982; // 45 degrees
+        } else
+        if ((data.w && !data.a && !data.s && !data.d)|| // W
+        (data.w && data.a && !data.s && data.d)) {
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = 1.570796; // 90 degrees
+        } else
+        if (data.w && !data.a && !data.s && data.d) { // W+D
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = 2.356194; // 135 degrees
+        } else
+        if ((!data.w && !data.a && !data.s && data.d)|| // D
+        (data.w && !data.a && data.s && data.d)) {
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = 3.141593; // 180 degrees
+        } else
+        if (!data.w && !data.a && data.s && data.d) { // S+D
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = -2.356194; // -135 degrees
+        } else
+        if ((!data.w && !data.a && data.s && !data.d)|| // S
+        (!data.w && data.a && data.s && data.d)) {
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = -1.570796; // -90 degrees
+        } else
+        if (!data.w && data.a && data.s && !data.d) { // A+S
+          entity.speed = DEFAULT_PLAYER_SPEED;
+          entity.angle = -0.7853982; // -45 degrees
+        } else
+        {
+          entity.speed = 0;
+        }
+      } else {
+        // character select
+        if ((!data.w && data.a && !data.s && !data.d)|| // A
+        (data.w && data.a && data.s && !data.d)) {
+          entity.model++;
+        } else
+        if ((!data.w && !data.a && !data.s && data.d)|| // D
+        (data.w && !data.a && data.s && data.d)) {
+          entity.model--;
+        }
+        if (entity.model >= MAX_PLAYER_MODELS)
+          entity.model = 0;
+        if (entity.model < 0)
+          entity.model = MAX_PLAYER_MODELS - 1;
+        this.state.setPlayerCharacter(client.sessionId);
+        console.log ("entity.model: ",entity.model, "entity.name: ",entity.name);        
       }
-
     }
 
     // change angle
@@ -82,20 +101,25 @@ export class ArenaRoom extends Room<State> {
 
     // fire projectile
     if (command === "down") {
-      if (entity.knockedOut) {
-        this.state.revivePlayer(client.sessionId);
-        return;
-      } else if (entity.coolDown <= 0) {
-        let vapeSpead:number = 3.0;
-        let vapeSpread:number = 0.25;
-        let vapePuffs=3;
-        const dst = Entity.distance(entity, data as Entity);
-        let speed = DEFAULT_PROJECTILE_SPEED;
-        let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
-        for (let i=0; i<vapePuffs; i++) {
-          this.state.createProjectile(client.sessionId, speed+(Math.random()*vapeSpead)-(vapeSpead*0.5), angle+(Math.random()*vapeSpread)-(vapeSpread*0.5));
+      if (entity.characterSelected) {
+        if (entity.knockedOut) {
+          this.state.revivePlayer(client.sessionId);
+          return;
+        } else if (entity.coolDown <= 0) {
+          let vapeSpead:number = 3.0;
+          let vapeSpread:number = 0.25;
+          let vapePuffs=3;
+          const dst = Entity.distance(entity, data as Entity);
+          let speed = DEFAULT_PROJECTILE_SPEED;
+          let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
+          for (let i=0; i<vapePuffs; i++) {
+            this.state.createProjectile(client.sessionId, speed+(Math.random()*vapeSpead)-(vapeSpead*0.5), angle+(Math.random()*vapeSpread)-(vapeSpread*0.5));
+          }
+          entity.coolDown = 18;
         }
-        entity.coolDown = 18;
+      } else {
+        // select character
+        entity.characterSelected = true;
       }
     }
   }

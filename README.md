@@ -17,9 +17,17 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## TODO:
 
-[] add
+[] character select
 
-[] actually code the 'game' part of the game
+[] add more characters from PR server
+
+[] add gravestones & cacti
+
+## Attributions
+
+ * gravestone art (@JoeCreates)
+
+
 
 ## License
 
