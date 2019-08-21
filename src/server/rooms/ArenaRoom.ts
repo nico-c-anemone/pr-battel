@@ -112,6 +112,8 @@ export class ArenaRoom extends Room<State> {
       //entity.speed = (dst < 20) ? 0 : Math.min(dst / 15, 4);
       //entity.angle = Math.atan2(entity.y - data.y, entity.x - data.x);
 
+      // have player face the mouse curson
+      entity.facing = entity.x<=data.x?0:1;
     }
 
     // fire projectile

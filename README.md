@@ -2,7 +2,7 @@
 
 A battle game using Colyseus + PixiJS.
 
-[View live demo](https://pr-battel.herokuapp.com)
+[Play Live!](https://pr-battel.herokuapp.com)
 
 ## Running locally
 
@@ -17,16 +17,27 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## TODO:
 
-[] character select
-
 [] add more characters from PR server
 
-[] add gravestones & cacti
+[] status effects
 
-## Attributions
+[] add gravestones, cacti, sand, etc.
+
+[] add health bars and hit points
+
+[] make damage from attaccs vary
+
+[] add special attacks
+
+[] scoreboard and round timer
+
+[] ? discord oauth ?
+
+## Attributions & Thanks
 
  * gravestone art (@JoeCreates)
 
+ * Colyseus endel
 
 
 ## License

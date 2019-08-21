@@ -17,6 +17,7 @@ const WORLD_SIZE = 1000;
 
 const DEFAULT_PLAYER_TYPE = 0;
 const DEFAULT_PROJECTILE_TYPE = 1;
+const DEFAULT_DECORATION_TYPE = 2;
 
 const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
@@ -217,6 +218,13 @@ export class Application extends PIXI.Application {
         this.viewport.addChild(nameText);
       }
 
+      //face it
+      if (entity.facing===1) {
+        sprite.scale.x = -1;
+      } else {
+        sprite.scale.x = 1;
+      }
+
       entity.onChange = (changes) => {
         this.stop(); // stope rendering while we moved stuff around
 
@@ -293,6 +301,12 @@ export class Application extends PIXI.Application {
           }
         }
 
+        //face it
+        if (entity.facing===1) {
+          sprite.scale.x = -1;
+        } else {
+          sprite.scale.x = 1;
+        }
 
         this.start(); //start up the renderer again
 
