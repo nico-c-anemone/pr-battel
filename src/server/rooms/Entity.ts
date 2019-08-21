@@ -11,6 +11,7 @@ export class Entity extends Schema {
     @type("number") kills: number;
     @type("number") coolDown: number;
     @type("string") name: string;
+    @type("number") primaryAttack: number;
     @type("boolean") characterSelected: boolean;
 
 
@@ -33,6 +34,7 @@ export class Entity extends Schema {
         this.kills = 0;
         this.coolDown = 0;
         this.name='';
+        this.primaryAttack=0;
         this.characterSelected=true;
     }
 

@@ -19,6 +19,9 @@ const DEFAULT_PROJECTILE_TYPE = 1;
 const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
 
+const PAINT_PROJECTILE_SUBTYPE = 2;
+const PAINT_PROJECTILE_COOLDOWN = 100;
+
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
 // define textures
@@ -145,6 +148,8 @@ export class Application extends PIXI.Application {
       let nameXOffset = -30;
       let nameYOffset = -55;
 
+      let paintcolour = 0xFFFFFF * Math.random();
+
       let current : boolean = (sessionId === room.sessionId);
 
       if (entity.type===DEFAULT_PLAYER_TYPE) {
@@ -169,13 +174,18 @@ export class Application extends PIXI.Application {
       }
 
       if (entity.type===DEFAULT_PLAYER_TYPE)
-        sprite.visible=current?true:false;
+      sprite.visible=current?true:false;
       this.viewport.addChild(sprite);
 
-      if ((entity.type===DEFAULT_PROJECTILE_TYPE) &&
-      (entity.subType===VAPE_PROJECTILE_SUBTYPE))
-      {
-        sprite.alpha=entity.coolDown/VAPE_PROJECTILE_COOLDOWN;
+      if (entity.type===DEFAULT_PROJECTILE_TYPE) {
+        if (entity.subType===VAPE_PROJECTILE_SUBTYPE)
+        {
+          sprite.alpha=entity.coolDown/25+0.1;
+        }
+        else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
+        {
+          sprite.tint = paintcolour;
+        }
       }
 
       if (entity.type===DEFAULT_PLAYER_TYPE)
@@ -210,7 +220,7 @@ export class Application extends PIXI.Application {
 
         for (let id in changes) {
           if (changes[id].field=="model")
-            sprite.texture = tex[entity.model];
+          sprite.texture = tex[entity.model];
         }
 
         // if this is the current player
@@ -232,46 +242,54 @@ export class Application extends PIXI.Application {
           }
         } else { //if it is not the current player
           if (entity.type===DEFAULT_PLAYER_TYPE){
-          if (!entity.characterSelected || entity.knockedOut)
-          {
-            sprite.visible = false;
-            killsText.visible = false;
-            nameText.visible = false;
-          } else {
-            sprite.visible = true;
-            killsText.visible = true;
-            nameText.visible = true;
+            if (!entity.characterSelected || entity.knockedOut)
+            {
+              sprite.visible = false;
+              killsText.visible = false;
+              nameText.visible = false;
+            } else {
+              sprite.visible = true;
+              killsText.visible = true;
+              nameText.visible = true;
+            }
           }
-        }
         }
         sprite.x = entity.x;
         sprite.y = entity.y;
         if (entity.type===DEFAULT_PLAYER_TYPE)
         {
           if (entity.characterSelected) {
-          kills = "kills: " + entity.kills;
-          killsText.text = kills;
-          killsText.x = sprite.x+killXOffset;
-          killsText.y = sprite.y+killYOffset;
-          name = entity.name + "\n" + sessionId;
-          nameText.text = name;
-          nameText.x = sprite.x+nameXOffset;
-          nameText.y = sprite.y+nameYOffset;
-        } else {
-          kills = "Please select your character\nusing A and D keys\npress E to join game.";
-          killsText.text = kills;
-          killsText.x = sprite.x+killXOffset;
-          killsText.y = sprite.y+killYOffset;
-          name = entity.name;
-          nameText.text = name;
-          nameText.x = sprite.x+nameXOffset;
-          nameText.y = sprite.y+nameYOffset;
+            kills = "kills: " + entity.kills;
+            killsText.text = kills;
+            killsText.x = sprite.x+killXOffset;
+            killsText.y = sprite.y+killYOffset;
+            name = entity.name + "\n" + sessionId;
+            nameText.text = name;
+            nameText.x = sprite.x+nameXOffset;
+            nameText.y = sprite.y+nameYOffset;
+          } else {
+            kills = "Please select your character\nusing A and D keys\npress E to join game.";
+            killsText.text = kills;
+            killsText.x = sprite.x+killXOffset;
+            killsText.y = sprite.y+killYOffset;
+            name = entity.name;
+            nameText.text = name;
+            nameText.x = sprite.x+nameXOffset;
+            nameText.y = sprite.y+nameYOffset;
+          }
         }
+
+        if (entity.type===DEFAULT_PROJECTILE_TYPE) {
+          if (entity.subType===VAPE_PROJECTILE_SUBTYPE)
+          {
+            sprite.alpha=entity.coolDown/25+0.1;
+          }
+          else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
+          {
+            sprite.tint = paintcolour;
+          }
         }
-        if (entity.type===DEFAULT_PROJECTILE_TYPE)
-        {
-          sprite.alpha=entity.coolDown/25+0.1;
-        }
+
 
         this.start(); //start up the renderer again
 

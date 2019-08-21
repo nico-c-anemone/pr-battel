@@ -13,6 +13,9 @@ const DEFAULT_PROJECTILE_TYPE = 1;
 const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
 
+const PAINT_PROJECTILE_SUBTYPE = 2;
+const PAINT_PROJECTILE_COOLDOWN = 100;
+
 const ATTACK_NONE = 0;
 const ATTACK_PAINT = 1;
 const ATTACK_VAPE = 2;
@@ -53,10 +56,11 @@ const CHARACTERS = [
     }
 
     setPlayerCharacter (sessionId: string) {
-      let character: number = this.entities[sessionId].model;
-      this.entities[sessionId].name = CHARACTERS[character].name;
+      let entity = this.entities[sessionId];
+      let character: number = entity.model;
+      entity.name = CHARACTERS[character].name;
+      entity.primaryAttack = CHARACTERS[character].primaryAttack;
       /* TODO:
-      primaryAttack
       specialAttack
       */
     }
@@ -76,12 +80,23 @@ const CHARACTERS = [
     createProjectile (sessionId: string, speed:number, angle: number) {
       const radius = DEFAULT_PROJECTILE_RADIUS;
       const parentEntity = this.entities[sessionId];
-      const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE, VAPE_PROJECTILE_SUBTYPE);
-      projectile.parentEntity = parentEntity;
-      projectile.speed = speed;
-      projectile.angle = angle;
-      projectile.coolDown = VAPE_PROJECTILE_COOLDOWN;
-      this.entities[nanoid(8)] = projectile;
+      if (parentEntity.primaryAttack===ATTACK_VAPE) {
+        // vape projectile
+        const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE, VAPE_PROJECTILE_SUBTYPE);
+        projectile.parentEntity = parentEntity;
+        projectile.speed = speed;
+        projectile.angle = angle;
+        projectile.coolDown = VAPE_PROJECTILE_COOLDOWN;
+        this.entities[nanoid(8)] = projectile;
+      } else if (parentEntity.primaryAttack===ATTACK_PAINT) {
+        // paint projectile
+        const projectile = new Entity(parentEntity.x, parentEntity.y, radius, DEFAULT_PROJECTILE_TYPE, PAINT_PROJECTILE_SUBTYPE);
+        projectile.parentEntity = parentEntity;
+        projectile.speed = speed;
+        projectile.angle = angle;
+        projectile.coolDown = PAINT_PROJECTILE_COOLDOWN;
+        this.entities[nanoid(8)] = projectile;
+      }
     }
 
 
