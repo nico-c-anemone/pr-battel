@@ -4,7 +4,7 @@ import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
 import { Entity } from "../server/rooms/Entity";
 
-import { Con } from "../server/rooms/Constants"
+import { Con } from "../server/Constants"
 
 const characterImage = require('./prmap.png');
 const pixelImage = require('./pixel.png');

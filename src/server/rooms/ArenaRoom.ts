@@ -2,9 +2,7 @@ import { Room, Client } from "colyseus";
 import { Entity } from "./Entity";
 import { State } from "./State";
 
-import { Con } from "./Constants"
-
-
+import { Con } from "../Constants";
 
 export class ArenaRoom extends Room<State> {
 

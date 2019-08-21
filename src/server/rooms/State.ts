@@ -2,7 +2,7 @@ import nanoid from "nanoid";
 import { Entity } from "./Entity";
 import { Schema, type, MapSchema } from "@colyseus/schema";
 
-import { Con } from "./Constants";
+import { Con } from "../Constants";
 
 export class State extends Schema {
 
