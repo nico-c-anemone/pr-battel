@@ -2,20 +2,20 @@ import { Room, Client } from "colyseus";
 import { Entity } from "./Entity";
 import { State } from "./State";
 
-const DEFAULT_PLAYER_SPEED = 5;
-const DEFAULT_PROJECTILE_SPEED = 12;
+export const DEFAULT_PLAYER_SPEED = 5;
+export const DEFAULT_PROJECTILE_SPEED = 12;
 
-const VAPE_PROJECTILE_SUBTYPE = 1;
-const VAPE_PROJECTILE_COOLDOWN = 25;
+export const VAPE_PROJECTILE_SUBTYPE = 1;
+export const VAPE_PROJECTILE_COOLDOWN = 25;
 
-const PAINT_PROJECTILE_SUBTYPE = 2;
-const PAINT_PROJECTILE_COOLDOWN = 200;
+export const PAINT_PROJECTILE_SUBTYPE = 2;
+export const PAINT_PROJECTILE_COOLDOWN = 150;
 
-const ATTACK_NONE = 0;
-const ATTACK_PAINT = 1;
-const ATTACK_VAPE = 2;
+export const ATTACK_NONE = 0;
+export const ATTACK_PAINT = 1;
+export const ATTACK_VAPE = 2;
 
-const MAX_PLAYER_MODELS = 2;
+export const MAX_PLAYER_MODELS = 2;
 
 export class ArenaRoom extends Room<State> {
 
@@ -136,18 +136,18 @@ export class ArenaRoom extends Room<State> {
               }
               entity.coolDown = 18;
             } else if (entity.primaryAttack==ATTACK_PAINT) {
-              let paintSpead:number = 1.5;
+              let paintSpead:number = 5.5;
               let paintSpread:number = 0.75;
-              let paintSplats=5;
+              let paintSplats=6;
               const dst = Entity.distance(entity, data as Entity);
-              let speed = DEFAULT_PROJECTILE_SPEED * 1.5;
+              let speed = DEFAULT_PROJECTILE_SPEED * 1.3;
               let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
               for (let i=0; i<paintSplats; i++) {
                 this.state.createProjectile(client.sessionId,
                   speed+(Math.random()*paintSpead)-(paintSpead*0.5),
                   angle+(Math.random()*paintSpread)-(paintSpread*0.5));
               }
-              entity.coolDown = 10;
+              entity.coolDown = 12;
             }
           }
         }

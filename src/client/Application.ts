@@ -7,6 +7,8 @@ import { Entity } from "../server/rooms/Entity";
 const characterImage = require('./prmap.png');
 const pixelImage = require('./pixel.png');
 
+require('../server/rooms/constants.ts');
+
 const ENDPOINT = (process.env.NODE_ENV==="development")
 ? "ws://localhost:8080"
 : "wss://pr-battel.herokuapp.com";
@@ -20,7 +22,7 @@ const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
 
 const PAINT_PROJECTILE_SUBTYPE = 2;
-const PAINT_PROJECTILE_COOLDOWN = 200;
+const PAINT_PROJECTILE_COOLDOWN = 150;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
@@ -148,7 +150,7 @@ export class Application extends PIXI.Application {
       let nameXOffset = -30;
       let nameYOffset = -55;
 
-      let paintcolour = 0xFFFFFF * Math.random();
+      let paintcolour = 360.0 * Math.random();
 
       let current : boolean = (sessionId === room.sessionId);
 
@@ -184,7 +186,7 @@ export class Application extends PIXI.Application {
         }
         else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
         {
-          sprite.tint = paintcolour;
+          sprite.tint = hslToNumber(paintcolour%360, 0.7, 0.5);
         }
       }
 
@@ -286,7 +288,8 @@ export class Application extends PIXI.Application {
           }
           else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
           {
-            sprite.tint = paintcolour;
+            sprite.tint = hslToNumber(paintcolour%360, 0.7, 0.5);
+            paintcolour+=15.0;
           }
         }
 
@@ -328,7 +331,7 @@ export class Application extends PIXI.Application {
       this.entities[id].y = lerp(this.entities[id].y, room.state.entities[id].y, 0.2);
     }
 
-    this.backgroundHue+=0.25;
+    this.backgroundHue+=0.33;
     this.renderer.backgroundColor = hslToNumber(this.backgroundHue%360, 0.5, 0.5);
 
     // continue looping if interpolation is still enabled.
