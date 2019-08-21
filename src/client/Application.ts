@@ -8,8 +8,7 @@ import { Con } from "../server/Constants"
 
 const characterImage = require('./prmap.png');
 const pixelImage = require('./pixel.png');
-
-
+const tileImage = require('./fractile.png');
 
 const ENDPOINT = (process.env.NODE_ENV==="development")
 ? "ws://localhost:8080"
@@ -23,10 +22,13 @@ FlorpTextureSheet.scaleMode = PIXI.SCALE_MODES.NEAREST;
 let frames = [];
 let tex = undefined
 
+const PixelTexture = PIXI.Texture.from(pixelImage);
+const TileTexture = PIXI.Texture.from(tileImage);
+
+let tilingSprite:any = {};
+
 // key stuff
 let pkeys=[];
-
-const PixelTexture = PIXI.Texture.from(pixelImage);
 
 const client = new Client(ENDPOINT);
 const room = client.join<State>("arena", {});
@@ -71,6 +73,23 @@ export class Application extends PIXI.Application {
     tex = frames.map(function(frame) { return new PIXI.Texture(FlorpTextureSheet, frame); });
 
     // load in projectile Graphics
+    tilingSprite = new PIXI.TilingSprite(
+    TileTexture,
+    this.screen.width,
+    this.screen.height,
+    );
+    tilingSprite.scale.x=2.0;
+    tilingSprite.scale.y=2.0;
+    this.stage.addChild(tilingSprite);
+
+    // draw boundaries of the world
+    const outerWall = new PIXI.Graphics();
+    outerWall.beginFill(0x000000);
+    outerWall.drawRoundedRect(-Con.OUTER_WALL_THICKNESS,
+      -Con.OUTER_WALL_THICKNESS, Con.WORLD_SIZE+Con.OUTER_WALL_THICKNESS*2,
+      Con.WORLD_SIZE+Con.OUTER_WALL_THICKNESS*2, 60);
+    outerWall.alpha = (0.6);
+    this.viewport.addChild(outerWall);
 
 
     // draw boundaries of the world
@@ -163,6 +182,10 @@ export class Application extends PIXI.Application {
       if (current) {
         this.currentPlayerEntity = sprite;
         this.viewport.follow(this.currentPlayerEntity);
+
+        // move the background
+        tilingSprite.tilePosition.x=-entity.x/tilingSprite.scale.x;
+        tilingSprite.tilePosition.y=-entity.y/tilingSprite.scale.y;
       }
 
       if (entity.type===Con.DEFAULT_PLAYER_TYPE)
@@ -231,6 +254,10 @@ export class Application extends PIXI.Application {
 
         // if this is the current player
         if (current) {
+
+          // move the background
+          tilingSprite.tilePosition.x=-entity.x/tilingSprite.scale.x;
+          tilingSprite.tilePosition.y=-entity.y/tilingSprite.scale.y;
 
           // if the character is not yet selected
           if (!entity.characterSelected) {
@@ -346,8 +373,8 @@ export class Application extends PIXI.Application {
       this.entities[id].y = lerp(this.entities[id].y, room.state.entities[id].y, 0.2);
     }
 
-    this.backgroundHue+=0.33;
-    this.renderer.backgroundColor = hslToNumber(this.backgroundHue%360, 0.5, 0.5);
+    this.backgroundHue+=Con.BACKGROUND_HUE_ROTATION_RATE;
+    tilingSprite.tint = hslToNumber(this.backgroundHue%360, 1.0, 0.7);
 
     // continue looping if interpolation is still enabled.
     if (this._interpolation) {

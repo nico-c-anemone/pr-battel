@@ -1,5 +1,9 @@
 export namespace Con {
-  export const WORLD_SIZE = 1050;
+  export const WORLD_SIZE = 1100;
+
+  export const OUTER_WALL_THICKNESS = 75;
+
+  export const BACKGROUND_HUE_ROTATION_RATE = 0.45;
 
   export const DEFAULT_PLAYER_RADIUS = 50;
   export const DEFAULT_PROJECTILE_RADIUS = 8;
