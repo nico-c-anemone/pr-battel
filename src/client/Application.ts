@@ -4,31 +4,22 @@ import { Client } from "colyseus.js";
 import { State } from "../server/rooms/State";
 import { Entity } from "../server/rooms/Entity";
 
+import { Con } from "../server/rooms/Constants"
+
 const characterImage = require('./prmap.png');
 const pixelImage = require('./pixel.png');
 
-require('../server/rooms/constants.ts');
+
 
 const ENDPOINT = (process.env.NODE_ENV==="development")
 ? "ws://localhost:8080"
 : "wss://pr-battel.herokuapp.com";
 
-const WORLD_SIZE = 1000;
-
-const DEFAULT_PLAYER_TYPE = 0;
-const DEFAULT_PROJECTILE_TYPE = 1;
-const DEFAULT_DECORATION_TYPE = 2;
-
-const VAPE_PROJECTILE_SUBTYPE = 1;
-const VAPE_PROJECTILE_COOLDOWN = 25;
-
-const PAINT_PROJECTILE_SUBTYPE = 2;
-const PAINT_PROJECTILE_COOLDOWN = 150;
-
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 
 // define textures
 const FlorpTextureSheet = PIXI.BaseTexture.from(characterImage);
+FlorpTextureSheet.scaleMode = PIXI.SCALE_MODES.NEAREST;
 let frames = [];
 let tex = undefined
 
@@ -63,8 +54,8 @@ export class Application extends PIXI.Application {
     this.viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
-      worldWidth: WORLD_SIZE,
-      worldHeight: WORLD_SIZE,
+      worldWidth: Con.WORLD_SIZE,
+      worldHeight: Con.WORLD_SIZE,
     });
 
     // set the background hue to 0;
@@ -85,7 +76,7 @@ export class Application extends PIXI.Application {
     // draw boundaries of the world
     const boundaries = new PIXI.Graphics();
     boundaries.beginFill(0x000000);
-    boundaries.drawRoundedRect(0, 0, WORLD_SIZE, WORLD_SIZE, 15);
+    boundaries.drawRoundedRect(0, 0, Con.WORLD_SIZE, Con.WORLD_SIZE, 15);
     this.viewport.addChild(boundaries);
 
     // add viewport to stage
@@ -149,19 +140,17 @@ export class Application extends PIXI.Application {
       let killXOffset = -30;
       let killYOffset = + 45;
       let nameXOffset = -30;
-      let nameYOffset = -55;
+      let nameYOffset = -75;
 
       let paintcolour = 360.0 * Math.random();
 
       let current : boolean = (sessionId === room.sessionId);
 
-      if (entity.type===DEFAULT_PLAYER_TYPE) {
+      if (entity.type===Con.DEFAULT_PLAYER_TYPE) {
         sprite.texture=tex[model];
-      } else if (entity.type===DEFAULT_PROJECTILE_TYPE) {
+      } else if (entity.type===Con.DEFAULT_PROJECTILE_TYPE) {
         sprite.texture=PixelTexture;
       }
-
-
 
       // center the sprite's anchor point
       sprite.anchor.set(0.5);
@@ -176,22 +165,11 @@ export class Application extends PIXI.Application {
         this.viewport.follow(this.currentPlayerEntity);
       }
 
-      if (entity.type===DEFAULT_PLAYER_TYPE)
+      if (entity.type===Con.DEFAULT_PLAYER_TYPE)
       sprite.visible=current?true:false;
       this.viewport.addChild(sprite);
 
-      if (entity.type===DEFAULT_PROJECTILE_TYPE) {
-        if (entity.subType===VAPE_PROJECTILE_SUBTYPE)
-        {
-          sprite.alpha=entity.coolDown/25+0.1;
-        }
-        else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
-        {
-          sprite.tint = hslToNumber(paintcolour%360, 0.7, 0.5);
-        }
-      }
-
-      if (entity.type===DEFAULT_PLAYER_TYPE)
+      if (entity.type===Con.DEFAULT_PLAYER_TYPE)
       {
 
         const style = new PIXI.TextStyle({
@@ -211,7 +189,7 @@ export class Application extends PIXI.Application {
 
         nameText = new PIXI.Text(name, style);
         name = entity.name;
-        nameText.text = name;
+        name = Con.CHARACTERS[entity.model].bio;
         nameText.x = sprite.x+nameXOffset;
         nameText.y = sprite.y+nameYOffset;
         nameText.visible=current?true:false;
@@ -219,11 +197,29 @@ export class Application extends PIXI.Application {
       }
 
       //face it
-      if (entity.facing===1) {
+      if (entity.facing===1&&entity.type===Con.DEFAULT_PLAYER_TYPE) {
         sprite.scale.x = -1;
-      } else {
+      } else if (entity.facing===0&&entity.type===Con.DEFAULT_PLAYER_TYPE) {
         sprite.scale.x = 1;
       }
+
+      if (entity.type===Con.DEFAULT_PROJECTILE_TYPE) {
+        if (entity.subType===Con.VAPE_PROJECTILE_SUBTYPE)
+        {
+          sprite.alpha=entity.coolDown/Con.VAPE_PROJECTILE_COOLDOWN+0.1;
+        }
+        else if (entity.subType===Con.PAINT_PROJECTILE_SUBTYPE)
+        {
+          sprite.tint = hslToNumber(paintcolour%360, 0.7, 0.5);
+          paintcolour+=15.0;
+        }
+        else if (entity.subType===Con.REE_PROJECTILE_SUBTYPE) {
+          sprite.scale.x=5.0;
+          sprite.scale.y=5.0;
+          sprite.alpha = (Math.random() *0.9) + 0.1;
+        }
+      }
+
 
       entity.onChange = (changes) => {
         this.stop(); // stope rendering while we moved stuff around
@@ -251,7 +247,7 @@ export class Application extends PIXI.Application {
             }
           }
         } else { //if it is not the current player
-          if (entity.type===DEFAULT_PLAYER_TYPE){
+          if (entity.type===Con.DEFAULT_PLAYER_TYPE){
             if (!entity.characterSelected || entity.knockedOut)
             {
               sprite.visible = false;
@@ -266,7 +262,7 @@ export class Application extends PIXI.Application {
         }
         sprite.x = entity.x;
         sprite.y = entity.y;
-        if (entity.type===DEFAULT_PLAYER_TYPE)
+        if (entity.type===Con.DEFAULT_PLAYER_TYPE)
         {
           if (entity.characterSelected) {
             kills = "kills: " + entity.kills;
@@ -282,30 +278,35 @@ export class Application extends PIXI.Application {
             killsText.text = kills;
             killsText.x = sprite.x+killXOffset;
             killsText.y = sprite.y+killYOffset;
-            name = entity.name;
+            name = Con.CHARACTERS[entity.model].bio;
             nameText.text = name;
             nameText.x = sprite.x+nameXOffset;
             nameText.y = sprite.y+nameYOffset;
           }
         }
 
-        if (entity.type===DEFAULT_PROJECTILE_TYPE) {
-          if (entity.subType===VAPE_PROJECTILE_SUBTYPE)
+        //face it
+        if (entity.facing===1&&entity.type===Con.DEFAULT_PLAYER_TYPE) {
+          sprite.scale.x = -1;
+        } else if (entity.facing===0&&entity.type===Con.DEFAULT_PLAYER_TYPE) {
+          sprite.scale.x = 1;
+        }
+
+        if (entity.type===Con.DEFAULT_PROJECTILE_TYPE) {
+          if (entity.subType===Con.VAPE_PROJECTILE_SUBTYPE)
           {
-            sprite.alpha=entity.coolDown/25+0.1;
+            sprite.alpha=entity.coolDown/Con.VAPE_PROJECTILE_COOLDOWN+0.1;
           }
-          else if (entity.subType===PAINT_PROJECTILE_SUBTYPE)
+          else if (entity.subType===Con.PAINT_PROJECTILE_SUBTYPE)
           {
             sprite.tint = hslToNumber(paintcolour%360, 0.7, 0.5);
             paintcolour+=15.0;
           }
-        }
-
-        //face it
-        if (entity.facing===1) {
-          sprite.scale.x = -1;
-        } else {
-          sprite.scale.x = 1;
+          else if (entity.subType===Con.REE_PROJECTILE_SUBTYPE) {
+            sprite.scale.x=5.0;
+            sprite.scale.y=5.0;
+            sprite.alpha = (Math.random() *0.9) + 0.1;
+          }
         }
 
         this.start(); //start up the renderer again
@@ -316,7 +317,7 @@ export class Application extends PIXI.Application {
         // remove the sprite if entity gets removed
         this.viewport.removeChild(sprite);
         sprite.destroy();
-        if (entity.type===DEFAULT_PLAYER_TYPE)
+        if (entity.type===Con.DEFAULT_PLAYER_TYPE)
         {
           this.viewport.removeChild(nameText);
           nameText.destroy();

@@ -19,9 +19,13 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 [] add more characters from PR server
 
+ who next?
+
 [] status effects
 
 [] add gravestones, cacti, sand, etc.
+
+[] spawn protection
 
 [] add health bars and hit points
 
