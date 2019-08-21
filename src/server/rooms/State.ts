@@ -88,6 +88,8 @@ export class State extends Schema {
           }
         }
 
+        // calculateScore
+
 
 
         update() {
@@ -208,7 +210,6 @@ export class State extends Schema {
             entity.y = Con.WORLD_SIZE-(entity.y-Con.WORLD_SIZE);
             entity.angle=-entity.angle;
           }
-          console.log(entity.angle);
         }
 
         killEntityAtWall(entity: Entity) {

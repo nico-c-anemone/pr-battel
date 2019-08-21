@@ -84,7 +84,6 @@ export class ArenaRoom extends Room<State> {
         if (entity.model < 0)
         entity.model = Con.MAX_PLAYER_MODELS - 1;
         this.state.setPlayerCharacter(client.sessionId);
-        console.log ("entity.model: ",entity.model, "entity.name: ",entity.name);
 
         if (data.e) {
           entity.characterSelected=true;
@@ -123,7 +122,7 @@ export class ArenaRoom extends Room<State> {
                   speed+(Math.random()*vapeSpead)-(vapeSpead*0.5),
                   angle+(Math.random()*vapeSpread)-(vapeSpread*0.5));
               }
-              entity.coolDown = 18;
+              entity.coolDown = 14;
             } else if (entity.primaryAttack==Con.ATTACK_PAINT) {
               let paintSpead:number = 5.5;
               let paintSpread:number = 0.75;
@@ -136,7 +135,7 @@ export class ArenaRoom extends Room<State> {
                   speed+(Math.random()*paintSpead)-(paintSpead*0.5),
                   angle+(Math.random()*paintSpread)-(paintSpread*0.5));
               }
-              entity.coolDown = 12;
+              entity.coolDown = 13;
             }
               else if (entity.primaryAttack==Con.ATTACK_REE) {
                 let reeSpead:number = 1.2;

@@ -14,6 +14,7 @@ export class Entity extends Schema {
     @type("number") primaryAttack: number;
     @type("boolean") characterSelected: boolean;
     @type("number") facing: number;
+    @type("number") rank: number;
 
 
     dead: boolean = false;
@@ -38,6 +39,7 @@ export class Entity extends Schema {
         this.primaryAttack=0;
         this.characterSelected=true;
         this.facing = 0;
+        this.rank = 0;
     }
 
     static distance(a: Entity, b: Entity) {

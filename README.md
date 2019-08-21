@@ -43,6 +43,7 @@ Open [http://localhost:8080](http://localhost:8080) in your browser.
 
  * Colyseus endel
 
+ * fractal image from [reddit](https://www.reddit.com/r/FractalPorn/comments/8hv6hi/multi_colored_fractal_art_seamless_pattern/)
 
 ## License
 

@@ -5,6 +5,8 @@ export namespace Con {
 
   export const BACKGROUND_HUE_ROTATION_RATE = 0.45;
 
+  export const SAND_GRAINS = 50;
+
   export const DEFAULT_PLAYER_RADIUS = 50;
   export const DEFAULT_PROJECTILE_RADIUS = 8;
 

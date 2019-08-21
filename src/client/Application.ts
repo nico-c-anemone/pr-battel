@@ -94,9 +94,19 @@ export class Application extends PIXI.Application {
 
     // draw boundaries of the world
     const boundaries = new PIXI.Graphics();
-    boundaries.beginFill(0x000000);
+    boundaries.beginFill(0x202225);
     boundaries.drawRoundedRect(0, 0, Con.WORLD_SIZE, Con.WORLD_SIZE, 15);
     this.viewport.addChild(boundaries);
+
+    // add clint-side sand to display
+    //let sand: PIXI.Graphics[]=[];
+    for (let i=0;i<Con.SAND_GRAINS;i++) {
+      const sand = new PIXI.Graphics();
+      boundaries.beginFill(0x72767d);
+      boundaries.drawRect(Math.random()*Con.WORLD_SIZE,
+        Math.random()*Con.WORLD_SIZE, 3, 3);
+      this.viewport.addChild(sand);
+    }
 
     // add viewport to stage
     this.stage.addChild(this.viewport);
@@ -110,7 +120,6 @@ export class Application extends PIXI.Application {
     this.viewport.on('mousedown', (e) => {
       if (this.currentPlayerEntity) {
         const point = this.viewport.toLocal(e.data.global);
-        console.log ("mouse down! ",point.x, point.y);
         room.send(['down', { x: point.x, y: point.y }]);
       }
     });
@@ -148,13 +157,15 @@ export class Application extends PIXI.Application {
     room.state.entities.onAdd = (entity, sessionId: string) => {
       // stop rendering until we handle this
       let model = entity.model;
-      console.log("model: ", model);
+      //console.log("model: ", model);
       let sprite = new PIXI.Sprite();
 
       let killsText:any; // text for kills
       let kills :string; // actual string
       let nameText:any; // text for kills
       let name :string; // actual string
+      let titleText:any; // text for kills
+      let title :string; // actual string
 
       let killXOffset = -30;
       let killYOffset = + 45;
@@ -201,6 +212,14 @@ export class Application extends PIXI.Application {
           fontWeight: 'bold',
           fill: ['#ffffff'], // gradient
         });
+
+        titleText = new PIXI.Text(title, style);
+        title = "PR Battel\nWASD to Move\nClick to Attacc.";
+        titleText.text = title;
+        titleText.x = 20;
+        titleText.y = 20;
+        titleText.visible=current?true:false;
+        this.stage.addChild(titleText);
 
         killsText = new PIXI.Text(kills, style);
         kills = "Please select your character\nusing A and D keys\npress E to join game.";
@@ -334,6 +353,12 @@ export class Application extends PIXI.Application {
             sprite.scale.y=5.0;
             sprite.alpha = (Math.random() *0.9) + 0.1;
           }
+        }
+
+        if (current) {
+          title = "PR Battel\nWASD to Move\nClick to Attacc.";
+          titleText.text = title;
+          titleText.visible=current?true:false;
         }
 
         this.start(); //start up the renderer again
