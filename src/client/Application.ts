@@ -20,7 +20,7 @@ const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
 
 const PAINT_PROJECTILE_SUBTYPE = 2;
-const PAINT_PROJECTILE_COOLDOWN = 100;
+const PAINT_PROJECTILE_COOLDOWN = 200;
 
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
 

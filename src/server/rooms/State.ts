@@ -14,7 +14,7 @@ const VAPE_PROJECTILE_SUBTYPE = 1;
 const VAPE_PROJECTILE_COOLDOWN = 25;
 
 const PAINT_PROJECTILE_SUBTYPE = 2;
-const PAINT_PROJECTILE_COOLDOWN = 100;
+const PAINT_PROJECTILE_COOLDOWN = 200;
 
 const ATTACK_NONE = 0;
 const ATTACK_PAINT = 1;
@@ -165,9 +165,8 @@ const CHARACTERS = [
             entity.x -= (Math.cos(entity.angle)) * entity.speed;
             entity.y -= (Math.sin(entity.angle)) * entity.speed;
             if ((entity.type === DEFAULT_PROJECTILE_TYPE)&&
-            (entity.subType === VAPE_PROJECTILE_SUBTYPE)) {
-              //console.log (entity.angle);
-              // entity.y-=(25-entity.coolDown)/2; //vape smoke rises
+            (entity.subType === PAINT_PROJECTILE_SUBTYPE)) {
+              entity.speed *= 0.9;
             }
 
             // apply boundary limits
