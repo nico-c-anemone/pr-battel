@@ -126,7 +126,7 @@ export class ArenaRoom extends Room<State> {
             } else if (entity.primaryAttack==Con.ATTACK_PAINT) {
               let paintSpead:number = 5.5;
               let paintSpread:number = 0.75;
-              let paintSplats=6;
+              let paintSplats=7;
               const dst = Entity.distance(entity, data as Entity);
               let speed = Con.DEFAULT_PROJECTILE_SPEED * 1.3;
               let angle = Math.atan2(entity.y - data.y, entity.x - data.x);
@@ -135,7 +135,7 @@ export class ArenaRoom extends Room<State> {
                   speed+(Math.random()*paintSpead)-(paintSpead*0.5),
                   angle+(Math.random()*paintSpread)-(paintSpread*0.5));
               }
-              entity.coolDown = 13;
+              entity.coolDown = 25;
             }
               else if (entity.primaryAttack==Con.ATTACK_REE) {
                 let reeSpead:number = 1.2;
@@ -149,7 +149,7 @@ export class ArenaRoom extends Room<State> {
                     speed+(Math.random()*reeSpead)-(reeSpead*0.5),
                     angle+(Math.random()*reeSpread)-(reeSpread*0.5));
                 }
-              entity.coolDown = 45;
+              entity.coolDown = 90;
             }
           }
         }
